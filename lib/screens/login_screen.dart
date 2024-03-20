@@ -1,10 +1,11 @@
+import 'package:community_social_app/navigation_menu.dart';
 import 'package:community_social_app/screens/home_screen.dart';
-import 'package:community_social_app/screens/signup-screen.dart';
 import 'package:community_social_app/utils/config.dart';
 import 'package:community_social_app/utils/next_screen.dart';
 import 'package:community_social_app/utils/snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:community_social_app/providers/sign_in_provider.dart';
 import 'package:community_social_app/providers/internet_provider.dart';
@@ -18,8 +19,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey _scaffoldKey = GlobalKey<ScaffoldState>();
-  // final RoundedLoadingButtonController googleController =
-  //     RoundedLoadingButtonController();
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height * 0.50;
@@ -100,13 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                         ),
                         FilledButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const SignupScreen()),
-                            );
-                          },
+                          onPressed: () => Get.to(() => const NavigationMenu()),
                           style: ButtonStyle(
                             minimumSize: MaterialStateProperty.all<Size>(
                               const Size(double.infinity, 60),
