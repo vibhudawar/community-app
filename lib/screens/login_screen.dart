@@ -1,8 +1,13 @@
+import 'package:community_social_app/screens/home_screen.dart';
+import 'package:community_social_app/screens/signup-screen.dart';
 import 'package:community_social_app/utils/config.dart';
+import 'package:community_social_app/utils/next_screen.dart';
+import 'package:community_social_app/utils/snack_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:community_social_app/providers/sign_in_provider.dart';
+import 'package:community_social_app/providers/internet_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -13,6 +18,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey _scaffoldKey = GlobalKey<ScaffoldState>();
+  // final RoundedLoadingButtonController googleController =
+  //     RoundedLoadingButtonController();
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height * 0.50;
@@ -93,7 +100,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                         ),
                         FilledButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignupScreen()),
+                            );
+                          },
                           style: ButtonStyle(
                             minimumSize: MaterialStateProperty.all<Size>(
                               const Size(double.infinity, 60),
@@ -142,13 +155,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                         ),
                         FloatingActionButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            handleGoogleSignIn();
+                          },
                           backgroundColor: lightGreenColorButton,
                           elevation: 0,
                           shape:
                               const CircleBorder(), // Set shape to CircleBorder
                           child: const Icon(FontAwesomeIcons.google),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -159,5 +174,52 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  // handling google sigin in
+  Future handleGoogleSignIn() async {
+    final sp = context.read<SignInProvider>();
+    final ip = context.read<InternetProvider>();
+    await ip.checkInternetConnection();
+
+    if (ip.hasInternet == false) {
+      openSnackbar(context, "Check your Internet connection", Colors.red);
+      // googleController.reset();
+    } else {
+      await sp.signInWithGoogle().then((value) {
+        if (sp.hasError == true) {
+          openSnackbar(context, sp.errorCode.toString(), Colors.red);
+          // googleController.reset();
+        } else {
+          // checking whether user exists or not
+          sp.checkUserExists().then((value) async {
+            if (value == true) {
+              // user exists
+              await sp.getUserDataFromFirestore(sp.uid).then((value) => sp
+                  .saveDataToSharedPreferences()
+                  .then((value) => sp.setSignIn().then((value) {
+                        // googleController.success();
+                        handleAfterSignIn();
+                      })));
+            } else {
+              // user does not exist
+              sp.saveDataToFirestore().then((value) => sp
+                  .saveDataToSharedPreferences()
+                  .then((value) => sp.setSignIn().then((value) {
+                        // googleController.success();
+                        handleAfterSignIn();
+                      })));
+            }
+          });
+        }
+      });
+    }
+  }
+
+  // handle after sign in
+  handleAfterSignIn() {
+    Future.delayed(const Duration(milliseconds: 1000)).then((value) {
+      nextScreen(context, const HomeScreen());
+    });
   }
 }

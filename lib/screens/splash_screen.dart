@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:community_social_app/utils/next_screen.dart';
 import 'package:community_social_app/providers/sign_in_provider.dart';
 import 'package:community_social_app/screens/home_screen.dart';
 import 'package:community_social_app/screens/login_screen.dart';
@@ -22,10 +22,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Timer(const Duration(seconds: 2), () {
       signInProvider.isSignedIn == false
-          ? Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => LoginScreen()))
-          : Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()));
+          ? nextScreen(context, LoginScreen())
+          : nextScreenReplace(context, const HomeScreen());
     });
   }
 
